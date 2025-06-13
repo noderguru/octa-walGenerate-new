@@ -1,8 +1,8 @@
 #!/bin/bash
 
 DIR="/root/octra/wallet_gen-new"
-FILE_URL="https://raw.githubusercontent.com/noderguru/octa-walGenerate-new/main/wallet_generator.py"
-TMUX_SESSION="octa-walletGenNEW"
+FILE_URL="https://raw.githubusercontent.com/noderguru/octra-walGenerate-new/main/wallet_generator.py"
+TMUX_SESSION="octra-walletGenNEW"
 PYTHON_FILE="wallet_generator.py"
 
 mkdir -p "$DIR"
