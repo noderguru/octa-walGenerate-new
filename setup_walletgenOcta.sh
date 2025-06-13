@@ -11,7 +11,7 @@ cd "$DIR" || exit 1
 wget -q "$FILE_URL" -O "$PYTHON_FILE"
 
 if ! dpkg -s python3-venv >/dev/null 2>&1; then
-    echo "Устанавливаем python3-venv..."
+    echo "Install python3-venv..."
     apt update && apt install -y python3-venv
 fi
 
