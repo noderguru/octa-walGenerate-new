@@ -1,3 +1,6 @@
+===========================================================================
+### https://faucet.octra.network
+===========================================================================
 ```bash
 mkdir -p /root/octra && cd /root/octra
 git clone https://github.com/noderguru/octra-walGenerate-new wallet_gen-new
