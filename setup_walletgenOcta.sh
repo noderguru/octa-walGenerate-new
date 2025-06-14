@@ -8,26 +8,52 @@ PYTHON_FILE="wallet_generator.py"
 mkdir -p "$DIR"
 cd "$DIR" || exit 1
 
-wget -q "$FILE_URL" -O "$PYTHON_FILE"
-
-if ! dpkg -s python3-venv >/dev/null 2>&1; then
-    echo "Install python3-venv..."
-    apt update && apt install -y python3-venv
+if [ ! -f "$PYTHON_FILE" ]; then
+    echo "[+] Downloading $PYTHON_FILE..."
+    wget -q "$FILE_URL" -O "$PYTHON_FILE"
+else
+    echo "[✓] $PYTHON_FILE already exists"
 fi
 
-python3 -m venv env
+install_if_missing() {
+    if ! command -v "$1" >/dev/null 2>&1; then
+        echo "[+] Installing $1..."
+        apt update && apt install -y "$2"
+    else
+        echo "[✓] $1 is already installed"
+    fi
+}
 
-tmux new-session -d -s "$TMUX_SESSION" "
-cd $DIR && \
-source env/bin/activate && \
-pip install --upgrade pip && \
-pip install pynacl ecdsa flask && \
-python3 $PYTHON_FILE
-"
+install_if_missing python3 python3
+install_if_missing python3-venv python3-venv
+install_if_missing tmux tmux
+install_if_missing ufw ufw
+install_if_missing curl curl
+
+if [ ! -d "env" ]; then
+    echo "[+] Creating Python virtual environment..."
+    python3 -m venv env
+else
+    echo "[✓] Virtual environment already exists"
+fi
+
+if ! tmux has-session -t "$TMUX_SESSION" 2>/dev/null; then
+    echo "[+] Starting tmux session '$TMUX_SESSION'..."
+    tmux new-session -d -s "$TMUX_SESSION" "
+    cd $DIR && \
+    source env/bin/activate && \
+    pip install --upgrade pip && \
+    pip install pynacl ecdsa flask && \
+    python3 $PYTHON_FILE
+    "
+else
+    echo "[✓] tmux session '$TMUX_SESSION' is already running"
+fi
 
 ufw allow 8888/tcp > /dev/null
 
-IP=$(curl -s https://api.ipify.org || hostname -I | awk '{print $1}')
+IP=$(curl -s https://api.ipify.org || hostname -I | awk '{for(i=1;i<=NF;i++) if ($i ~ /^[0-9]+\./) {print $i; exit}}')
 
-echo "✅ Flask wallet launched in tmux session '$TMUX_SESSION'"
-echo "🌐 Open in browser: http://$IP:8888"
+# === Final info output ===
+echo "✅ Flask wallet is running inside tmux session '$TMUX_SESSION'"
+echo "🌐 Open in your browser: http://$IP:8888"
